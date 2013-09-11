@@ -19,10 +19,10 @@ SHARED_DIRECTORIES = [
     "shared/log"
 ]
 
-INSTALL_FILE = "var/INSTALLED"
-
 deploy_user = node[:opsworks][:deploy_user][:user]
 deploy_dir  = node[:deploy][APPLICATION][:deploy_to]
+
+dns_name    = node[:opsworks][:public_dns_name]
 
 WRITABLE_DIRECTORIES.each do |dir|
     dir_path = File.join(deploy_dir, "current", dir)
@@ -47,4 +47,29 @@ SHARED_DIRECTORIES.each do |dir|
         user deploy_user
         not_if "test -d #{dir_path}"
     end
+end
+
+template File.join(deploy_dir, "current", "var/default.conf.php") do
+    source "default.conf.php.erb"
+    mode "0644"
+    owner deploy_user
+    variables({
+        :dns_name => dns_name
+    })
+end
+
+template File.join(deploy_dir, "current", "var/#{dns_name}.conf.php") do
+    source "server.conf.php.erb"
+    mode "0644"
+    owner deploy_user
+    variables({
+        :dns_name => dns_name,
+        :deploy_dir => deploy_dir
+    })
+end
+
+file File.join(deploy_dir, "current", "var/INSTALLED") do
+    action :touch
+    mode "0644"
+    owner deploy_user
 end
