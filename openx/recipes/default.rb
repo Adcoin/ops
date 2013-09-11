@@ -19,10 +19,10 @@ SHARED_DIRECTORIES = [
     "shared/log"
 ]
 
-deploy_user = node[:opsworks][:deploy_user][:user]
+deploy_user = "deploy" # from opsworks cookbooks: node[:opsworks][:deploy_user][:user]
 deploy_dir  = node[:deploy][APPLICATION][:deploy_to]
 
-dns_name    = node[:opsworks][:public_dns_name]
+dns_name    = node[:opsworks][:instance][:public_dns_name]
 
 WRITABLE_DIRECTORIES.each do |dir|
     dir_path = File.join(deploy_dir, "current", dir)
